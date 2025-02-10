@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="author" CONTENT="Ewazer">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet" type="text/css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css">
+  <title>Discover Extension Randomizer - Enhance Your Workflow</title>
+  <meta name="description" content="Find the best extensions with Extension Randomizer. Simplify your workflow and discover new tools for productivity and creativity.">
+  <meta name="keywords" content="extension randomizer, browser tools, productivity extensions, creative tools, extension discovery">
+  <meta property="og:title" content="Discover Extension Randomizer - Enhance Your Workflow">
+  <meta property="og:description" content="Find the best extensions with Extension Randomizer. Simplify your workflow and discover new tools for productivity and creativity.">
+  <meta property="og:type" content="website">
+  <meta name="robots" content="index, follow">
+</head>
+<body>
+    <div class="loader"></div>
+    <div id="filter-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2 class="Filter-title">Filters</h2>
+            <p class="desc-filter">Set the criteria for random extension selection</p>
+            
+            <label for="category">Category</label>
+            <input type="text" id="category" placeholder="e.g., Productivity">
+
+            <label class="rating-label-filter" for="min-rating">Minimum Rating</label>
+            <div class="rating-filter"> 
+                <input type="range" id="min-rating" min="0" max="5" step="0.1" value="0">
+                <span id="min-rating-value">0</span>/5
+            </div>
+    
+            <label class="rating-label-filter" for="min-rating">Maximum Rating</label>
+            <div class="rating-filter"> 
+                <input type="range" id="max-rating" min="0" max="5" step="0.1" value="5">
+                <span id="max-rating-value">5</span>/5
+            </div>
+
+            <label for="min-users">Minimum Users</label>
+            <input type="number" pattern="\d+" id="min-users" min="0" placeholder="0">
+<!-- 
+            <label for="max-users">Maximum Users</label>
+            <input type="number" pattern="\d+" id="max-users" min="0" placeholder="0">
+     -->
+            <div class="filter-button-change">
+                <button id="apply-filters">Apply</button>
+                <button id="close-modal">Close</button>
+             </div>
+        </div>
+    </div>
+    
+    <h1 class="title">Chrome Extension Randomizer</h1>
+    <p class="desc-project">Discover amazing Chrome extensions randomly</p>
+    <div class="random-go">
+        <button class="button-go-random" onclick="loadRandomExtension(this)"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ico-refresh"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 16H3v5"></path></svg> Random Extension</button>
+        <button class="filter-button"><svg class="filter-ico" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sliders-horizontal h-4 w-4"><line x1="21" x2="14" y1="4" y2="4"></line><line x1="10" x2="3" y1="4" y2="4"></line><line x1="21" x2="12" y1="12" y2="12"></line><line x1="8" x2="3" y1="12" y2="12"></line><line x1="21" x2="16" y1="20" y2="20"></line><line x1="12" x2="3" y1="20" y2="20"></line><line x1="14" x2="14" y1="2" y2="6"></line><line x1="8" x2="8" y1="10" y2="14"></line><line x1="16" x2="16" y1="18" y2="22"></line></svg></button>
+    </div>
+    <section class="random">
+        <div class="random-box">
+            <div class="title-sec">
+                <img class="logo" src="{{ extension_info.logo }}" alt="Logo">
+                <div class="name-and-title">
+                    <h1 class="name">{{ extension_info.name }}</h1>
+                    <p class="description">{{ extension_info['description-short'] }}</p>
+                </div>
+            </div>
+            <div class="box_info">
+                {% if extension_info.video and extension_info.video.startswith("https://www.youtube.com/embed/") %}
+                    <iframe class="banner" 
+                            src="{{ extension_info.video }}" 
+                            frameborder="0" 
+                            allowfullscreen>
+                    </iframe>
+                {% else %}
+                    <img class="banner" 
+                        src="{{ extension_info.banner[0] }}" 
+                        alt="Banner" 
+                        onerror="this.onerror=null;this.src='https://developer.chrome.com/static/blog/cws-policy-updates-2024/image/thumbnail.png?hl=fr';">
+                {% endif %}
+            
+            </div>
+            <div class="category-box">
+                <div class="category">{{ extension_info.category[0] }}</div>
+                <div class="category">{{ extension_info.category[1] }}</div>
+            </div>
+            <div class="bottom-box">
+                <p class="review"><strong>Review :&nbsp;</strong>&nbsp;{{ extension_info.rating }}&nbsp;<svg width="20" height="20" viewBox="0 0 24 24" focusable="false" class="star"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21 12 17.27z"></path></svg>&nbsp;({{ extension_info.review }})&nbsp;</p>
+                <p class="last_update"><strong>Last update :</strong> {{ extension_info.last_update }}</p>
+                <p class="user_count"><strong>Users :</strong> {{ extension_info.users }}</p>
+            </div>
+            <a href="{{ extension_info.url }}" target="_blank" class="ext">View in Chrome Web Store</a>
+        </div>
+    </section>
+    <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
+    <script>
+        const categories = [
+            "accessibility",
+            "art",
+            "communication",
+            "developer",
+            "education",
+            "entertainment",
+            "fun",
+            "functionality",
+            "games",
+            "household",
+            "lifestyle",
+            "make_chrome_yours",
+            "news",
+            "privacy",
+            "productivity",
+            "shopping",
+            "social",
+            "tools",
+            "travel",
+            "well_being",
+            "workflow"
+        ];
+
+        const input = document.getElementById('category');
+        const tagify = new Tagify(input, {
+            whitelist: categories,
+            enforceWhitelist: true,
+            maxTags: 2,
+            dropdown: {
+                enabled: 1, 
+                position: "input",
+                closeOnSelect: false
+            }
+        });
+    </script>
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+                const loader = document.querySelector('.loader');
+                
+                window.addEventListener('load', () => {
+                    loader.classList.add('fondu-out');
+                });
+        });
+        function loadRandomExtension(button) {
+                button.disabled = true;
+                button.innerHTML = '<div class="spinner"></div>';
+                window.location.reload();
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const filterButton = document.querySelector('.filter-button');
+            const filterModal = document.getElementById('filter-modal');
+            const closeModal = document.getElementById('close-modal');
+            const minRatingInput = document.getElementById('min-rating');
+            const minRatingValue = document.getElementById('min-rating-value');
+            const maxRatingInput = document.getElementById('max-rating');
+            const maxRatingValue = document.getElementById('max-rating-value');
+        
+            if (filterButton && filterModal && closeModal) {
+                filterButton.addEventListener('click', () => {
+                    filterModal.classList.remove('hidden');
+                });
+        
+                closeModal.addEventListener('click', () => {
+                    filterModal.classList.add('hidden');
+                });
+        
+                minRatingInput.addEventListener('input', () => {
+                    minRatingValue.textContent = minRatingInput.value;
+                });
+        
+                maxRatingInput.addEventListener('input', () => {
+                    maxRatingValue.textContent = maxRatingInput.value;
+                });
+        
+                filterModal.addEventListener('click', (e) => {
+                    if (e.target === filterModal) {
+                        filterModal.classList.add('hidden');
+                    }
+                });
+            } else {
+                console.error('One or more elements not found');
+            }
+        });
+        </script>
+        <script>
+            document.getElementById('apply-filters').addEventListener('click', () => {
+                const tags = tagify.value.map(tag => tag.value); 
+                let minRating = document.getElementById('min-rating').value;
+                let minUsers = document.getElementById('min-users').value;
+                let maxRating = document.getElementById('max-rating').value;
+
+                minRating = minRating || 0;
+                minUsers = minUsers || 0;
+                maxRating = maxRating || 0;
+                
+
+                const categoryParam = encodeURIComponent(tags.join(','));
+                const url = `/random?category=${categoryParam}&minRating=${minRating}&minUsers=${minUsers}&maxRating=${maxRating}`;
+                window.location.href = url;
+            });
+        </script>
+</body>
+</html>
